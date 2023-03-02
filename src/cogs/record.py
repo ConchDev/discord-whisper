@@ -61,6 +61,30 @@ class Record(discord.Cog):
         vc.stop_recording()
         await ctx.respond("Recording stopped. Use `/play` to play the recording.")
 
+    @discord.command()
+    async def disconnect(self, ctx: discord.ApplicationContext):
+        if self.bot.connections.get(ctx.guild.id, None):
+            await ctx.respond(embed=discord.Embed(
+                title=":x: You have to stop recording before I can disconnect!",
+                description="Please stop recording with the `/stop` command.",
+                color=discord.Colors.red()
+            ))
+        
+        elif not ctx.guild.voice_client:
+            await ctx.respond(embed=discord.Embed(
+                title=":x: I'm not connected to a voice channel!",
+                description="I have to be in a voice channel before I can leave it.",
+                color=discord.Colors.red()
+            ))
+
+        else:
+            await ctx.guild.voice_client.disconnect()
+
+            await ctx.respond(embed=discord.Embed(
+                title=":white_check_mark: Disconnected!",
+                description="Successfully disconnected from the voice channel.",
+                color=discord.Colors.green()
+            ))
 
 
 
