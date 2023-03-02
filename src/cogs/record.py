@@ -1,6 +1,9 @@
 import discord
 import typing
 import datetime
+import pydub
+import soundfile as sf
+import numpy as np
 
 if typing.TYPE_CHECKING:
     from ..bot import Bot
@@ -11,8 +14,21 @@ class Record(discord.Cog):
         super().__init__()
     
     async def after_recording(self, sink: discord.sinks.WaveSink, channel: discord.VoiceChannel):
-        file = [discord.File(audio.file, f"{user_id}.{sink.encoding}") for user_id, audio in sink.audio_data.items()]
-        await channel.send("Here is your recording.", files=file)
+
+        
+        audio_data = []
+        for _, audio in sink.audio_data.items:
+            audio_data.append(audio)
+        audio_data = np.concatenate(audio_data)
+        sf.write("recording.wav", audio_data, 48000)
+
+        # Convert the audio segment to a pydub.AudioSegment
+        audio_segment = pydub.AudioSegment.from_wav("recording.wav")
+
+        # Send the audio segment to the channel the recording was started in
+        await channel.send(file=discord.File(audio_segment.export("recording.mp3", format="mp3")))
+
+
 
 
     @discord.command()
@@ -20,7 +36,8 @@ class Record(discord.Cog):
         voice = ctx.author.voice
 
         if not voice:
-            return await ctx.respond("You are not in a voice channel. Please connect to one and try again.")
+            return await ctx.respond("You are not in a voice channel. Please connect to"
+                                     " one and try again.")
         
         vc = await voice.channel.connect()
         self.bot.connections.update({ctx.guild.id: {"vc": vc, "time": datetime.datetime.now()}})

@@ -1,3 +1,4 @@
 py-cord[voice]
 openai
 python-dotenv
+pydub
